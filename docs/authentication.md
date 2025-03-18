@@ -100,7 +100,7 @@ Below is an example of how the **mobile** generate dfinity keypair:
 
     const passkey = await PasskeyProvider.create(challenge, this.passkey);
 
-        const payload = {
+    const payload = {
       id: passkey.id,
       rawId: passkey.rawId,
       response: {

@@ -41,7 +41,3 @@ The authentication flow consists of **two main components**:
 ## 📖 More Details
 
 For implementation details, refer to the project documentation.
-
----
-
-This README provides an overview of the authentication flow. For full integration details, check the source code and comments within the project.

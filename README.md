@@ -41,3 +41,4 @@ The authentication flow consists of **two main components**:
 ## 📖 More Details
 
 For implementation details, refer to the project documentation.
+[Documentation](https://unpaired-eth.github.io/docs-w3meet-auth/)

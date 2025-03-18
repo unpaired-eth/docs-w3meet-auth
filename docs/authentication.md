@@ -10,7 +10,9 @@ The authentication process follows these steps:
 Below is an example of how the **canister** generates a challenge and stores it:
 
 ```javascript
-static registerPasskey(user: User): string {
+const challenges = new StableStorage<string, Challenge>(0);
+
+registerPasskey(user: User): string {
     try {
       const randomBytes = Array.from({ length: 32 }, () =>
         Math.floor(Math.random() * 256)
@@ -35,11 +37,88 @@ static registerPasskey(user: User): string {
 - If successful, the mobile app:
   - Validates the user’s **Passkey credentials**.
   - Creates a **Dfinity keypair**.
+  
+#### Code Example - Passkey Authentication:
+Below is an example of how the **mobile** create a passkey and validates it:
+
+```javascript
+  Passkey.create({
+    challenge,
+    user: passkey.user,
+    rp: passkey.rp,
+    pubKeyCredParams: [
+      {
+        type: 'public-key',
+        alg: -7,
+      },
+      {
+        type: 'public-key',
+        alg: -257,
+      },
+    ],
+    timeout: 1800000,
+    attestation: 'none',
+    excludeCredentials: [],
+    authenticatorSelection: {
+      authenticatorAttachment: 'platform',
+      requireResidentKey: true,
+      residentKey: 'required',
+      userVerification: 'required',
+    },
+  });
+```  
 
 ## 3️⃣ Passkey Validation (Canister)
 - The **mobile device** sends:
   - The **Passkey payload**.
   - The **Dfinity public key**.
+
+#### Code Example - Generate Dfinity keypair:
+Below is an example of how the **mobile** generate dfinity keypair:
+
+```javascript
+  export class KeypairProvider {
+    private static pubkeys: TPubKeys = {};
+
+    static create(user: TPasskey['user']) {
+      const currentPubkey = KeypairProvider.pubkeys[user.id];
+
+      if (currentPubkey) {
+        return currentPubkey;
+      }
+
+      const base = Ed25519KeyIdentity.generate();
+      const pubkey = toHex(base.getPublicKey().toDer());
+
+      KeypairProvider.pubkeys[user.id] = {
+        base,
+        pubkey,
+      };
+
+      return { pubkey, base };
+    }
+
+    const passkey = await PasskeyProvider.create(challenge, this.passkey);
+
+        const payload = {
+      id: passkey.id,
+      rawId: passkey.rawId,
+      response: {
+        attestationObject: passkey.response.attestationObject,
+        clientDataJSON: passkey.response.clientDataJSON,
+      },
+    };
+
+    const { pubkey, base } = KeypairProvider.create(this.passkey.user);
+
+    const { error, data } = await this.actor.authValidatePasskey(
+      pubkey,
+      this.passkey.user,
+      payload
+    );
+```  
+
+
 - The **canister** validates the payload against the challenge.
   - If **invalid**, the process stops here.
   - If **valid**, the canister proceeds to delegation.

@@ -6,6 +6,30 @@ The authentication process follows these steps:
 - The **canister** generates a challenge and stores it.
 - The mobile device retrieves the **challenge hash**.
 
+#### Code Example - Challenge Generation:
+Below is an example of how the **canister** generates a challenge and stores it:
+
+```javascript
+static registerPasskey(user: User): string {
+    try {
+      const randomBytes = Array.from({ length: 32 }, () =>
+        Math.floor(Math.random() * 256)
+      );
+
+      const challenge = Buffer.from(randomBytes).toString("base64");
+
+      challenges.insert(user.id, {
+        id: user.id,
+        value: challenge,
+      });
+
+      return challenge;
+    } catch (error) {
+      return "Error to get challenge";
+    }
+  }
+```
+
 ## 2️⃣ Passkey Authentication (Mobile)
 - The user authenticates using a **Passkey**.
 - If successful, the mobile app:
